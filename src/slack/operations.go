@@ -143,6 +143,9 @@ func (p *Provider) ShowStickerPreview(_ context.Context, userID, channelID, tag,
 
 	if _, _, err := p.client.PostMessage(channelID, msgOptions...); err != nil {
 		log.Err(err).Msg("PostMessage failed")
+		if err.Error() == helper.ErrChannelNotFound.Error() {
+			return helper.ErrChannelNotFound
+		}
 		return err
 	}
 
@@ -237,6 +240,9 @@ func (p *Provider) SendStickerToChannel(_ context.Context, userID, channelID, re
 	)
 	if err != nil {
 		log.Err(err).Msg("PostMessage failed to send sticker")
+		if err.Error() == helper.ErrChannelNotFound.Error() {
+			return helper.ErrChannelNotFound
+		}
 		return err
 	}
 

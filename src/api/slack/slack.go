@@ -4,6 +4,7 @@ package slack
 import (
 	"context"
 	"encoding/json"
+	"errors"
 	"net/http"
 	"net/url"
 	"regexp"
@@ -138,6 +139,10 @@ func (s *slackHandler) interactivityUsed() gin.HandlerFunc {
 				err = s.controller.SendSticker(context.Background(), teamID, userID, channelToSendSticker, responseURL, isDM, sticker)
 				if err != nil {
 					log.Err(err).Msg("controller.SendSticker failed")
+					if errors.Is(err, helper.ErrChannelNotFound) {
+						helper.SendSlackModalError(c, helper.ChannelNotFoundResponse)
+						return
+					}
 					restModel.ErrorResponse(c, http.StatusBadRequest, err.Error())
 					return
 				}
@@ -311,7 +316,11 @@ func (s *slackHandler) slashCommandUsed() gin.HandlerFunc {
 
 			if err = s.controller.GetStickerSearchResult(context.Background(), req.ChannelID, req.TeamID, req.UserID, query, nil, nil, isDM, req.ResponseURL); err != nil {
 				log.Err(err).Msg("controller.GetStickerSearchResult failed.")
-				c.String(http.StatusBadRequest, err.Error())
+				if errors.Is(err, helper.ErrChannelNotFound) {
+					c.JSON(http.StatusOK, helper.ChannelNotFoundResponse)
+					return
+				}
+				c.JSON(http.StatusBadRequest, err.Error())
 				return
 			}
 		}

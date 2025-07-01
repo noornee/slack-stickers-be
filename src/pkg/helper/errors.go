@@ -1,6 +1,11 @@
 package helper
 
-import "errors"
+import (
+	"errors"
+	"net/http"
+
+	"github.com/gin-gonic/gin"
+)
 
 var (
 	// ErrRecordNotFound if the record is not found in the database
@@ -21,4 +26,35 @@ var (
 	ErrGinContextRetrieveFailed = errors.New("could not retrieve gin.Context")
 	// ErrGinContextWrongType gin.Context has wrong type
 	ErrGinContextWrongType = errors.New("gin.Context has wrong type")
+
+	ErrChannelNotFound = errors.New("channel_not_found")
 )
+
+const ChannelNotFoundResponse = "is this a private channel? invite bot to channel before invoking slash command"
+
+// SendSlackModalError replaces a Slack modal with an error message
+func SendSlackModalError(c *gin.Context, errorMessage string) {
+	c.JSON(http.StatusOK, gin.H{
+		"response_action": "update",
+		"view": gin.H{
+			"type": "modal",
+			"title": gin.H{
+				"type": "plain_text",
+				"text": "Error",
+			},
+			"close": gin.H{
+				"type": "plain_text",
+				"text": "Close",
+			},
+			"blocks": []gin.H{
+				{
+					"type": "section",
+					"text": gin.H{
+						"type": "mrkdwn",
+						"text": ":x: " + errorMessage,
+					},
+				},
+			},
+		},
+	})
+}
