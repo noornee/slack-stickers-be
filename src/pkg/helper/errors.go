@@ -27,9 +27,11 @@ var (
 	// ErrGinContextWrongType gin.Context has wrong type
 	ErrGinContextWrongType = errors.New("gin.Context has wrong type")
 
+	// ErrChannelNotFound slack error for when bot is not in channel
 	ErrChannelNotFound = errors.New("channel_not_found")
 )
 
+// ChannelNotFoundResponse readable response msg to send
 const ChannelNotFoundResponse = "is this a private channel? invite bot to channel before invoking slash command"
 
 // SendSlackModalError replaces a Slack modal with an error message
